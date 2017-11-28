@@ -1,256 +1,339 @@
-////抽象方法只会声明在abstract 关键字的类中
-//abstract class Person {
-//    private String name;
-//    public String getName() {
-//        return this.name;
+
+//class myThread implements Runnable{
+//    private int tickets = 10;
+//
+////    @Override
+////    public void run(){
+////       for(int i=0;i<1000;i++){
+////           //同步代码块
+////           synchronized (this){
+////               if(this.tickets > 0){
+////                   try{
+////                       Thread.sleep(200);
+////                   }
+////                   catch (Exception e){
+////                       e.printStackTrace();
+////                   }
+////                   System.out.println(Thread.currentThread().getName()+"还剩"+tickets--+"票");
+////               }
+////           }
+////       }
+////    }
+//    public void run(){
+//        for(int i=0; i<1000;i++){
+//            this.sale();
+//        }
 //    }
 //
-//    public void setName() {
-//        this.name = name;
-//    }
-//
-//    //抽象方法不能够进行实例化
-//    public abstract void getInfo();
-//}
-//
-//class Student extends Person{
-//    public void getInfo() {
-//        System.out.println("I am a student");
-//    }
-//}
-//
-//interface IMessage {
-//    abstract void print();
-//}
-//
-//class MessageImpl implements IMessage {
-//    public void print() {
-//        System.out.println("I am a biter");
+//    private synchronized void sale(){
+//        if(this.tickets > 0){
+//            try {
+//                Thread.sleep(200);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//            System.out.println(Thread.currentThread().getName()+"还剩"+tickets--+"票");
+//        }
 //    }
 //}
 //
 //public class Main {
-//    public static void main(String[] args) {
-//        //多态的特性
-//        MessageImpl mes = new MessageImpl();
-//        mes.print();
+//    public static void main(String[] args){
+//        myThread mt = new myThread();
+//        new Thread(mt,"threadA").start();
+//        new Thread(mt,"threadB").start();
+//    }
+//}
+
+//class Sync {
+//    private String word = "Hello, Java";
+//    public void test() {
+//        synchronized (this) {
+//            System.out.println("test begin ..." + Thread.currentThread().getName() + " " + this.word);
+//            try {
+//                Thread.sleep(200);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("test end ..." + Thread.currentThread().getName());
+//        }
 //    }
 //}
 
 
-//interface IMessage {
-//    public void print();
-//}
-//
-//abstract class News implements IMessage {
-//    public abstract void getNews();
-//}
-//
-//class MessageImpl extends News {
-//    public void print() {
-//        System.out.println("I am a biter");
+//class myThread implements Runnable {
+//    private Sync sync;
+//    public myThread(Sync sync){
+//        this.sync = sync;
 //    }
 //
-//    public void getNews() {
-//        System.out.println("I am a news");
+//    public void run(){
+//        this.sync.test();
+//    }
+//}
+//
+//public class Main {
+//    public static void main(String[] args){
+//        Sync sync = new Sync();
+//
+//        for(int i=0;i<3 ;i++){
+//            myThread mt = new myThread(sync);
+//            new Thread(mt,"thread"+i).start();
+//        }
+//    }
+//}
+
+//使用全局锁
+//class Sync {
+//    public void test(){
+//        synchronized (Sync.class){
+//            System.out.println("test begin ..." + Thread.currentThread().getName());
+//            try {
+//                Thread.sleep(200);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//
+//            System.out.println("test end ..." + Thread.currentThread().getName());
+//        }
+//    }
+//}
+//
+//class myThread implements Runnable  {
+//    public void run(){
+//        new Sync().test();
+//    }
+//}
+//
+//public class Main {
+//    public static void main(String[] args){
+//        myThread mt = new myThread();
+//        for(int i=0;i<10;i++){
+//            new Thread(mt,"thread "+i).start();
+//        }
+//    }
+//}
+
+//import java.util.concurrent.SynchronousQueue;
+//
+//class Pen {
+//    private String pen = "this is a pen";
+//
+//    public String getPen() {
+//        return pen;
+//    }
+//}
+//
+//class Book {
+//    private  String book = "this is a book";
+//
+//    public String getBook(){
+//        return book;
 //    }
 //}
 //
 //public class Main{
+//    private static Pen pencil = new Pen();
+//    private static Book newBook = new Book();
+//
+//    public void deadLock() {
+//        Thread thread1 = new Thread(new Runnable(){
+//            @Override
+//            public void run() {
+//                synchronized (pencil){
+//                    System.out.println(Thread.currentThread().getName() + " 我有笔，我就不给你");
+//
+//                    synchronized (newBook){
+//                        System.out.println(Thread.currentThread().getName()+ " 把你的书给我");
+//                    }
+//                }
+//            }
+//        },"pen");
+//
+//        Thread thread2 = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                synchronized (newBook){
+//                    System.out.println(Thread.currentThread().getName()+"我有书，我就不给你");
+//
+//                    synchronized (pencil){
+//                        System.out.println(Thread.currentThread().getName()+"把你的笔借我用用");
+//                    }
+//                }
+//            }
+//        },"book");
+//        thread1.start();
+//        thread2.start();
+//    }
 //    public static void main(String[] args) {
-//        IMessage m = new MessageImpl();
-//        m.print();
+//        new Main().deadLock();
 //    }
 //}
 
-
-////设计模式--工厂模式
+//生产者消费者模型（不带条件变量和锁资源）
+//class Data {
+//    private String title ;
+//    private String note ;
 //
-//import com.sun.istack.internal.NotNull;
+//    public void setTitle(String title){
+//        this.title = title ;
+//    }
 //
-//interface IFruit {
-//    public void eat();
-//}
+//    public String getTitle() {
+//        return title ;
+//    }
 //
-//class Apple implements IFruit {
-//    public void eat() {
-//        System.out.println("eat apple");
+//    public void setNote(String note){
+//        this.note = note ;
+//    }
+//
+//    public String getNote() {
+//        return note;
 //    }
 //}
 //
-//class Melon implements IFruit {
-//    public void eat() {
-//        System.out.println("eat melon");
-//    }
-//}
+//class DataConsumer implements Runnable {
+//    private Data data;
 //
-//class Factory {
-//    public static IFruit getInstance(String className) {
-//        if("apple".equals(className)) {
-//            return new Apple();
+//    public DataConsumer(Data data) {
+//        super();
+//        this.data = data;
+//    }
+//
+//    @Override
+//    public void run(){
+//        for(int i=0; i<50; i++){
+//            try{
+//                Thread.sleep(500);
+//            }catch (InterruptedException e){
+//                e.printStackTrace();
+//            }
+//            System.out.println(this.data.getTitle()+"##"+this.data.getNote());
 //        }
+//    }
+//}
 //
-//        if("melon".equals(className)) {
-//            return new Melon();
+//class DataProvider implements Runnable {
+//    private Data data;
+//    public DataProvider(Data data){
+//        super();
+//        this.data = data ;
+//    }
+//
+//    @Override
+//    public void run() {
+//        for(int i=0; i<50; i++){
+//            try{
+//                Thread.sleep(500);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//            if(i%2 == 0){
+//                this.data.setTitle("lebron-james");
+//                this.data.setNote("联盟第一人");
+//            }else{
+//                this.data.setTitle("kevin-durant");
+//                this.data.setNote("千年老二");
+//            }
 //        }
-//
-//        return null;
-//    }
-//}
-//
-//
-//public class Main {
-//    public static void main(String[] args){
-//        IFruit p = Factory.getInstance("apple");
-//        if(p!=null)
-//            p.eat();
-//    }
-//}
-
-//public class Main {
-//    public static void main(String[] args) {
-////        String str1 = "Hello";
-////        //直接赋值则直接进行引用
-////        String str2 = new String("Hello").intern();
-////        //用在对象上面表示的是对象的地址
-////        System.out.println(str1==str2);
-////        System.out.println(str1.equals(str2));
-////        String str = "lebron james";
-////        char[] charArray = str.toCharArray();
-////        for(int i=0;i<charArray.length; i++) {
-////            if(charArray[i]!=' ')
-////                charArray[i] -= 32;
-////        }
-////        System.out.println(new String(charArray));
-//
-////        String name = new String("Lebron James");
-////        System.out.println(name.startsWith("Lebron "));
-//
-//        //ip地址的拆分
-////        String ipName = "192.168.220.17";
-////        String[] res = ipName.split("\\.");
-////        for (String result: res
-////             ) {
-////            System.out.println(result);
-////        }
-//    }
-//}
-
-//class SingleTon {
-//    public static SingleTon insTance = new SingleTon();
-//    private SingleTon() {}
-//
-//    public void print() {
-//        System.out.println("Hello ,World");
 //    }
 //}
 //
 //public class Main {
 //    public static void main(String[] args) {
-//        SingleTon single = null;
-//        single = SingleTon.insTance;
-//        single.print();
+//        Data data = new Data();
+//        new Thread(new DataConsumer(data)).start();
+//        new Thread(new DataProvider(data)).start();
 //    }
 //}
 
-import java.util.LinkedList;
-
-//链表的实现
-class classNode<T> {
-    public T data;
-    public classNode next;
-    public classNode front;
-    public classNode(){
-        this.next = null ;
-        this.front = null ;
+class Data {
+    private String title ;
+    private String note ;
+    private boolean flag ;
+    //flag = true :表示允许生产,不允许消费
+    //flag = false :表示生产完毕,可以消费
+    public synchronized void set(String title, String node){
+        if(this.flag == false){
+            try{
+                super.wait();
+            }catch(InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+        this.title = title ;
+        try {
+            Thread.sleep(10);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+        this.note = note;
+        this.flag = false ;
+        super.notify();
     }
 
-    public void setData(T data) {
-        this.data = data ;
-    }
-
-    public void setNext(classNode Node) {
-        this.next = Node ;
+    public synchronized void get(){
+        if(this.flag == true ){
+            try{
+                super.wait();
+            }catch(InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+        try{
+            Thread.sleep(20);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+        System.out.println(this.title + "###"+this.note);
+        this.flag = true;
+        super.notify();
     }
 }
 
-class linkList<T> {
-    private classNode _begin;
-    private classNode _end;
-    private int size ;
-    public linkList() {
-        this._begin = new classNode();
-        this._end = new classNode();
-        _begin.next = _end;
-        _end.front = _begin;
-        size = 0;
+class DataProvider implements Runnable {
+    private Data data;
+    public DataProvider(Data data){
+        super();
+        this.data = data ;
     }
 
-    public void pushBack(T data) {
-        classNode<T> newNode = new classNode<>();
-        newNode.setData(data);
-        classNode<T> frontNode = _end.front;
-
-        frontNode.next = newNode;
-        newNode.next = _end;
-        newNode.front = frontNode;
-        _end.front = newNode;
-        size++;
-    }
-
-    public int getSize() {
-        return this.size;
-    }
-
-    public void pushFront(T data) {
-        classNode<T> newNode = new classNode<>();
-        newNode.setData(data);
-
-        newNode.next = _begin.next;
-        _begin.next.front = newNode;
-        newNode.front = _begin;
-        _begin.next = newNode;
-    }
-
-    public void printList() {
-        classNode<T> cur = _begin.next;
-        while(cur!=null && cur!= _end) {
-            System.out.println(cur.data);
-            cur = cur.next;
-        }
-    }
-
-    public boolean delNode(T data) {
-        classNode<T> cur = _begin.next ;
-        while(cur!=null) {
-            if(cur.data.equals(data)) {
-                break;
+    @Override
+    public void run(){
+        for(int i=0;i<20;i++){
+            if(i%2 == 0){
+                this.data.set("lebron-james","联盟第一人");
+            }else{
+                this.data.set("kevin-durant","千年老二");
             }
-
-            cur = cur.next ;
         }
+    }
+}
 
-        if(cur!=null){
-            classNode<T> frontNode = cur.front ;
-            frontNode.next = cur.next;
-            cur.next.front = frontNode;
-            return true;
+class DataConsumer implements Runnable {
+    private Data data;
+    public DataConsumer(Data data){
+        super();
+        this.data = data;
+    }
+
+    @Override
+    public void run(){
+        for(int i=0; i<50; i++){
+            try{
+                Thread.sleep(500);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+            this.data.get();
         }
-        return false;
     }
 }
 
 public class Main {
-    public static void main (String[] args) {
-        linkList<Integer> link = new linkList<>();
-        link.pushBack(1);
-        link.pushBack(2);
-        link.pushBack(3);
-        link.pushFront(4);
-        link.pushFront(5);
-
-        link.printList();
-        link.delNode(3);
-        link.printList();
+    public static void main(String[] args) {
+        Data data = new Data();
+        new Thread(new DataProvider(data)).start();
+        new Thread(new DataConsumer(data)).start();
     }
 }
